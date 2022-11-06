@@ -6,16 +6,18 @@ const icon = searchWrapper.querySelector(".icon");
 let linkTag = searchWrapper.querySelector("a");
 let webLink;
 
-var file = "matrix.c";
+
+var file = "matrix";
+var extension = ".c";
 
 function fetchFileFromGithub() {
-    var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file);
+    var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file).concat(extension);
 
     fetch(url)
     .then(function(response) {
         response.text().then(function(text) {
           document.getElementById("code").textContent = text;
-          document.getElementById("lang").textContent = file;
+          document.getElementById("lang").textContent = file.concat(extension);
           hljs.initHighlighting.called = false;
           hljs.initHighlighting();
           hljs.initLineNumbersOnLoad();
