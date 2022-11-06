@@ -13,6 +13,11 @@ var extension = ".c";
 function fetchFileFromGithub() {
     var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file).concat(extension);
 
+    // Show code
+    //document.getElementById("wrapper").style.marginTop = "5%";
+    document.getElementById("wrapper").className = "wrapper-show";
+    document.getElementById("container").className = "container-show";
+
     fetch(url)
     .then(function(response) {
         response.text().then(function(text) {
@@ -35,7 +40,6 @@ inputBox.onkeyup = (e)=>{
             //webLink = `https://www.google.com/search?q=${userData}`;
             //linkTag.setAttribute("href", webLink);
             //linkTag.click();
-            console.log(userData);
             file = userData;
             fetchFileFromGithub();
         }
@@ -104,5 +108,5 @@ document.addEventListener('DOMContentLoaded', () => {
   
     copyButton.addEventListener('click', copyTextHandler);
 
-    fetchFileFromGithub();
+    //fetchFileFromGithub();
 });
