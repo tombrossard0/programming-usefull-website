@@ -9,27 +9,38 @@ let webLink;
 
 var file = "";
 var extension = ".c";
+let best_score = 0;
 
 
-function compare(str1, str2, matches = []) {
-    str1.replace(/(\w+)/g, m => str2.search(new RegExp(m, "i")) >= 0 && matches.push(m));
+
+function compare2(str1, str2, matches = []) {
+    (str1).replace(/(\w+)/g, m => str2.search(new RegExp(m, "i")) >= 0 && matches.push(m));
     return matches;
 }
 
-function GetBestResult(input)
-{
-    let best_score = 0;
-    let _file = "";
 
-    for (var i = 0; i < suggestions.length; i++)
+function compare(str1, str2, matches = []) {
+    const re = /void (.)*/gi;
+    const list = str2.match(re);
+    const newstr = list != null ? list.join(" ") : "";
+    //console.log(newstr);
+    (str1).replace(/(\w+)/g, m => newstr.search(new RegExp(m, "i")) >= 0 && matches.push(m));
+    return matches;
+}
+
+function GetBestResult(input, i = 0)
+{
+
+    if (i < suggestions.length)
     {
-        let _file = suggestions[i];
+        _file = suggestions[i];
+        console.log(suggestions[i]);
 
         fetch("https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/".concat(_file).concat(extension))
             .then(function(response) {
                 response.text().then(function(text) {
                 let score = compare(input, text).length;
-                console.log(compare(input, text));
+                //console.log(compare(input, text));
                 if (score >= best_score)
                 {
                     file = _file;
@@ -38,21 +49,58 @@ function GetBestResult(input)
 
             })
             .then(function(response) {
-                fetchFileFromGithub_next();
+                GetBestResult(input, i+1);
             });
         });
+    }
+    else {
+        if (best_score <= 0)
+        {
+            GetBestResult2(input);
+        }
+        else {
+            fetchFileFromGithub_next();
+            best_score = -1;
+        }
+        
+    }
+}
+
+function GetBestResult2(input, i = 0)
+{
+
+    if (i < suggestions.length)
+    {
+        _file = suggestions[i];
+        console.log(suggestions[i]);
+
+        fetch("https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/".concat(_file).concat(extension))
+            .then(function(response) {
+                response.text().then(function(text) {
+                let score = compare2(input, text).length;
+                if (score >= best_score)
+                {
+                    file = _file;
+                    best_score = score;
+                }
+
+            })
+            .then(function(response) {
+                GetBestResult2(input, i+1);
+            });
+        });
+    }
+    else {            
+        fetchFileFromGithub_next();
+        best_score = -1;
     }
 }
 
 function fetchFileFromGithub() {
-    console.log(suggestions);
     GetBestResult(file);
 }
 
 function fetchFileFromGithub_next() {
-    console.log(file);
-
-
     // Show code
     document.getElementById("wrapper").className = "wrapper-show";
     document.getElementById("container").className = "container-show";
