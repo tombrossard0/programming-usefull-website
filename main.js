@@ -18,12 +18,22 @@ function compare2(str1, str2, matches = []) {
     return matches;
 }
 
+/* Get complete functions
+function compare(str1, str2, matches = []) {
+    const re = /void (\w)*\((.)*\}|double (\w)*\((.)*\}/gi;
+    const list = str2.replace(/(\r\n|\n|\r)/gm, "²").match(re);
+    const newstr = list != null ? list.join("\n") : "";
+    console.log(newstr.replaceAll("²", "\n"));
+    (str1).replace(/(\w+)/g, m => newstr.search(new RegExp(m, "i")) >= 0 && matches.push(m));
+    return matches;
+}
+*/
 
 function compare(str1, str2, matches = []) {
-    const re = /void (.)*/gi;
+    const re = /void (\w)*\((.)*|double (\w)*\((.)*/gi;
     const list = str2.match(re);
-    const newstr = list != null ? list.join(" ") : "";
-    //console.log(newstr);
+    const newstr = list != null ? list.join("\n") : "";
+    console.log(newstr);
     (str1).replace(/(\w+)/g, m => newstr.search(new RegExp(m, "i")) >= 0 && matches.push(m));
     return matches;
 }
