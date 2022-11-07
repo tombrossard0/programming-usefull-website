@@ -7,28 +7,72 @@ let linkTag = searchWrapper.querySelector("a");
 let webLink;
 
 
-var file = "matrix";
+var file = "";
 var extension = ".c";
 
+
+function compare(str1, str2, matches = []) {
+    str1.replace(/(\w+)/g, m => str2.search(new RegExp(m, "i")) >= 0 && matches.push(m));
+    return matches;
+}
+
+function GetBestResult(input)
+{
+    let best_score = 0;
+    let _file = "";
+
+    for (var i = 0; i < suggestions.length; i++)
+    {
+        let _file = suggestions[i];
+
+        fetch("https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/".concat(_file).concat(extension))
+            .then(function(response) {
+                response.text().then(function(text) {
+                let score = compare(input, text).length;
+                console.log(compare(input, text));
+                if (score >= best_score)
+                {
+                    file = _file;
+                    best_score = score;
+                }
+
+            })
+            .then(function(response) {
+                fetchFileFromGithub_next();
+            });
+        });
+    }
+}
+
 function fetchFileFromGithub() {
-    var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file).concat(extension);
+    console.log(suggestions);
+    GetBestResult(file);
+}
+
+function fetchFileFromGithub_next() {
+    console.log(file);
+
 
     // Show code
-    //document.getElementById("wrapper").style.marginTop = "5%";
     document.getElementById("wrapper").className = "wrapper-show";
     document.getElementById("container").className = "container-show";
 
+    var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file).concat(extension);
+
+
     fetch(url)
-    .then(function(response) {
-        response.text().then(function(text) {
-          document.getElementById("code").textContent = text;
-          document.getElementById("lang").textContent = file.concat(extension);
-          hljs.initHighlighting.called = false;
-          hljs.initHighlighting();
-          hljs.initLineNumbersOnLoad();
+        .then(function(response) {
+            response.text().then(function(text) {
+            document.getElementById("code").textContent = text;
+            document.getElementById("lang").textContent = file.concat(extension);
+            hljs.initHighlighting.called = false;
+            hljs.initHighlighting();
+            hljs.initLineNumbersOnLoad();
         });
     });
 }
+
+
 
 // if user press any key and release
 inputBox.onkeyup = (e)=>{
