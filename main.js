@@ -10,7 +10,8 @@ let webLink;
 var file = "";
 var extension = ".c";
 let best_score = 0;
-
+var best_text = "";
+var corresponding = [];
 
 
 function compare2(str1, str2, matches = []) {
@@ -18,22 +19,29 @@ function compare2(str1, str2, matches = []) {
     return matches;
 }
 
-/* Get complete functions
-function compare(str1, str2, matches = []) {
-    const re = /void (\w)*\((.)*\}|double (\w)*\((.)*\}/gi;
+//console.log(/void (\w)+\((.(?!void))*\)(.(?!void))*\{(.(?!void))*\}/gi.exec('AHAHAH void test() { {} } AHAHAH void test() {} BB'));
+
+function get_function(str1, str2, matches = []) {
+    const re = /void (\w)+\((.(?!void))*\)(.(?!void))*\{(.(?!void))*\}|double (\w)+\((.(?!double))*\)(.(?!double))*\{(.(?!double))*\}/gi;
     const list = str2.replace(/(\r\n|\n|\r)/gm, "²").match(re);
-    const newstr = list != null ? list.join("\n") : "";
-    console.log(newstr.replaceAll("²", "\n"));
-    (str1).replace(/(\w+)/g, m => newstr.search(new RegExp(m, "i")) >= 0 && matches.push(m));
-    return matches;
+    const newstr = list != null ? list.join("\n°") : "";
+    const _newstr = newstr.replaceAll("²", "\n");
+    const new_list = _newstr.split("°");
+    for (let i = 0; i < new_list.length; i++)
+    {
+        (str1).replace(/(\w+)/g, m => new_list[i].search(new RegExp(m, "i")) >= 0 && matches.push(m));
+        if (matches.length > 0)
+            corresponding.push(new_list[i]);
+        matches = [];
+    }
+    return corresponding;
 }
-*/
 
 function compare(str1, str2, matches = []) {
     const re = /void (\w)*\((.)*|double (\w)*\((.)*/gi;
     const list = str2.match(re);
     const newstr = list != null ? list.join("\n") : "";
-    console.log(newstr);
+    //console.log(newstr);
     (str1).replace(/(\w+)/g, m => newstr.search(new RegExp(m, "i")) >= 0 && matches.push(m));
     return matches;
 }
@@ -51,10 +59,13 @@ function GetBestResult(input, i = 0)
                 response.text().then(function(text) {
                 let score = compare(input, text).length;
                 //console.log(compare(input, text));
-                if (score >= best_score)
+                if (score > 0)
                 {
                     file = _file;
+                    best_text = text;
                     best_score = score;
+                    //console.log(best_text);
+                    fetchFileFromGithub_next(input);
                 }
 
             })
@@ -69,7 +80,7 @@ function GetBestResult(input, i = 0)
             GetBestResult2(input);
         }
         else {
-            fetchFileFromGithub_next();
+            //fetchFileFromGithub_next(input);
             best_score = -1;
         }
         
@@ -101,28 +112,31 @@ function GetBestResult2(input, i = 0)
         });
     }
     else {            
-        fetchFileFromGithub_next();
+        fetchFileFromGithub_next(input);
         best_score = -1;
     }
 }
 
 function fetchFileFromGithub() {
+    corresponding = [];
     GetBestResult(file);
 }
 
-function fetchFileFromGithub_next() {
+function fetchFileFromGithub_next(input) {
     // Show code
     document.getElementById("wrapper").className = "wrapper-show";
     document.getElementById("container").className = "container-show";
 
     var url = 'https://raw.githubusercontent.com/tombrossard0/programming-usefull/main/C/'.concat(file).concat(extension);
 
-
     fetch(url)
         .then(function(response) {
+            //console.log(get_function(input, best_text));
+
             response.text().then(function(text) {
-            document.getElementById("code").textContent = text;
+            document.getElementById("code").textContent = get_function(input, best_text).join("\n\n");
             document.getElementById("lang").textContent = file.concat(extension);
+            
             hljs.initHighlighting.called = false;
             hljs.initHighlighting();
             hljs.initLineNumbersOnLoad();
